@@ -33,6 +33,7 @@ public class TempController {
         Object[] stats = rooms.stream().map((Room room) -> {
             int currentTemp = room.getCurrentTemp();
             int desiredTemp = room.getTemp();
+            int gasSpent = room.getGasSpent();
             VALVE_STEPS valveState = room.getValve().getState();
             String present = room.getSensor().getPresence() ? "People Present" : "People Absent";
             String valveStateStr;
@@ -41,34 +42,33 @@ public class TempController {
             else if (valveState == VALVE_STEPS.HALF_OPEN) valveStateStr = "Valve Half-open";
             else valveStateStr = "Unknown Valve State";
 
-            return String.format("Current: %dC | Desired: %dC | %s | %s", currentTemp, desiredTemp, present, valveStateStr);
+            return String.format("Current: %dC | Desired: %dC | %s | %s | Gas %d", currentTemp, desiredTemp, present, valveStateStr, gasSpent);
         }).toArray();
         return Arrays.copyOf(stats, stats.length, String[].class);
     }
 
     public void tick(String time, Weekday day) {
-        String timeSplit[] = time.split(":", 2);
-        int hours = new Integer(timeSplit[0]);
         rooms.forEach((Room room) -> {
-            room.tick();
+            room.tick(time, day);
             IRSensor sensor = room.getSensor();
             Valve valve = room.getValve();
             int currentTemp = room.getCurrentTemp();
-            int desiredTemp = room.getTemp();
+            int desiredTemp = sensor.getPresence() ? room.getTemp() : room.getTemp() - 5;
 
-            if (currentTemp >= desiredTemp + 5) {
+            if (currentTemp > desiredTemp) {
                 valve.setState(CLOSED);
-            } else if (currentTemp <= desiredTemp - 5) {
+            } else if (currentTemp < desiredTemp) {
                 valve.setState(OPEN);
             } else {
                 valve.setState(HALF_OPEN);
             }
         });
 
-        System.out.print(String.format("%s, %s \n", DateTime.formatDay(day), time));
+        int totalGasSpent = rooms.stream().map(Room::getGasSpent).reduce(0, (a, b) -> a + b);
+        System.out.print(String.format("%s, %s, Total Gas Spent: %d \n", DateTime.formatDay(day), time, totalGasSpent));
         String[] stats = formatStats();
         for (int i = 0; i < stats.length; i++) {
-            System.out.print(String.format("Room #%d | %s \n", i, stats[i]));
+            System.out.print(String.format("Room #%d | %s\n", i, stats[i]));
         }
     }
 }

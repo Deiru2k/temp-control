@@ -45,12 +45,12 @@ public class DateTime {
     private void advanceDay() {
         synchronized (this) {
             switch(day) {
-                case MONDAY: day = Weekday.TUESDAY;
-                case TUESDAY: day = Weekday.THURSDAY;
-                case THURSDAY: day = Weekday.FRIDAY;
-                case FRIDAY: day = Weekday.SATURDAY;
-                case SATURDAY: day = Weekday.SUNDAY;
-                case SUNDAY: day = Weekday.MONDAY;
+                case MONDAY: day = Weekday.TUESDAY; break;
+                case TUESDAY: day = Weekday.THURSDAY; break;
+                case THURSDAY: day = Weekday.FRIDAY; break;
+                case FRIDAY: day = Weekday.SATURDAY; break;
+                case SATURDAY: day = Weekday.SUNDAY; break;
+                case SUNDAY: day = Weekday.MONDAY; break;
             }
         }
     }

@@ -1,30 +1,34 @@
 package house;
 
-import tempcontrol.IRSensor;
-import tempcontrol.Schedule;
-import tempcontrol.VALVE_STEPS;
-import tempcontrol.Valve;
+import tempcontrol.*;
 
 public class Room {
+    private String name;
     private int temp;
     private int currentTemp;
-    private boolean people;
+    private int gasSpent = 0;
     private Schedule schedule;
     private IRSensor sensor;
     private Valve valve;
 
 
-    public Room(boolean defaultPresence, int defaultTemp, int defaultCurrentTemp, VALVE_STEPS defaultValveState, boolean initPeople, Schedule initSchedule) {
+    public Room(String defaultName, boolean defaultPresence, int defaultTemp, int defaultCurrentTemp, VALVE_STEPS defaultValveState, Schedule initSchedule) {
+        name = defaultName;
         temp = defaultTemp;
         currentTemp = defaultCurrentTemp;
         sensor = new IRSensor(defaultPresence);
         valve = new Valve(defaultValveState);
-        people = initPeople;
         schedule = initSchedule;
     }
 
-    public void setPeople(boolean value) {
-        people = value;
+    public Schedule getSchedule() { return schedule; }
+
+    public void setName(String value) { name = value; }
+
+    public String getName() { return name; }
+
+    public void setPresence(boolean value) {
+        sensor.setPresence(value);
     }
 
     public int getTemp() {
@@ -35,6 +39,8 @@ public class Room {
         return currentTemp;
     }
 
+    public int getGasSpent() { return gasSpent; }
+
     public IRSensor getSensor() {
         return sensor;
     }
@@ -43,13 +49,15 @@ public class Room {
         return valve;
     }
 
-    public void tick() {
-        sensor.tick();
+    public void tick(String time, Weekday day) {
+        HourSchedule.Event evt = schedule.getEvent(day, time);
+        sensor.tick(evt);
         VALVE_STEPS valveState = valve.getState();
         if (valveState == VALVE_STEPS.CLOSED) {
             currentTemp -= 1;
         } else if (valveState == VALVE_STEPS.OPEN) {
             currentTemp += 1;
         }
+        gasSpent += valveState.getValue();
     }
 }

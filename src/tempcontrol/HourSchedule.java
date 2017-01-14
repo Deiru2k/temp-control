@@ -10,6 +10,11 @@ public class HourSchedule {
     private Map<String, Event> schedule = new HashMap<>();
 
     public HourSchedule() {}
+    public HourSchedule(String time, Event event) {
+        HashMap<String, Event> newSch = new HashMap<>();
+        newSch.put(time, event);
+        schedule = newSch;
+    }
     public HourSchedule(HashMap<String, Event> initSchedule) {
         schedule = initSchedule;
     }

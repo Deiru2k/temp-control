@@ -21,7 +21,14 @@ public class IRSensor {
         return presence;
     }
 
-    public NullType tick() {
-        return null;
+    public void tick(HourSchedule.Event evt) {
+        switch(evt) {
+            case ARRIVAL:
+                setPresence(true);
+                break;
+            case DEPARTURE:
+                setPresence(false);
+                break;
+        }
     }
 }
